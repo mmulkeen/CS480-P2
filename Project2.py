@@ -1,25 +1,24 @@
 import collections
 import math
-
+import queue
 def BFS(state):
-
-    visited, queue = set(), collections.deque([[state, [state]]])
-
-    while queue:
-        node = queue.pop()
+    array = []
+    array.append([state, -1])
+    q = queue.Queue()
+    q.put([state, len(array)-1])
+    while q:
+        node = q.get()
+        if Valid(node[0]):
+            return node[0]
 
         children = findChildren(node[0])
 
         for child in children:
+            if (child != node[0]):
+                array.append([child, node[1]])
+                q.put([child, len(array) - 1])
 
-            state = child
-            path = node[1]
-            path.append(child)
 
-            queue.append([state, path])
-
-            if Valid(child):
-                return node[1]
 
 
 
