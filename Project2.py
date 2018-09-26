@@ -1,11 +1,16 @@
 import collections
 import math
 import queue
+
 def BFS(state):
+
+
     array = []
     array.append([state, -1])
     q = queue.Queue()
     q.put([state, len(array)-1])
+    visited = []
+    visited.append(state)
     while q:
         node = q.get()
         if Valid(node[0]):
@@ -14,10 +19,11 @@ def BFS(state):
         children = findChildren(node[0])
 
         for child in children:
-            if (child != node[0]):
+
+            if child != node[0]:
                 array.append([child, node[1]])
                 q.put([child, len(array) - 1])
-
+                visited.append(child)
 
 
 
@@ -31,8 +37,9 @@ def findChildren(state):
     while i < len(state):
 
         for j in range(len(state) - i):
-
-            children += [reverse(state, j, j+i)]
+            temp = reverse(state, j, j+i)
+            if state != temp:
+                children += [reverse(state, j, j+i)]
 
         i += 1
 
