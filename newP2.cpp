@@ -65,7 +65,24 @@ void BFS( vector<int> permutation, int n ) {
 			currentNode->PrintNode();
 			return;
 		}
-		vector<vector<int>> children = findChildren(currentNode->key);
+		vector<vector<int>> children;
+		for ( int i = 0; i < currentNode->key.size(); i++) {
+                	for ( int j = i+1; j <= currentNode->key.size(); j++) {
+                        	vector<int> temp = currentNode->key;
+                        	reverse(temp.begin()+i, temp.begin()+j);
+                        	if (temp != currentNode->key){
+                                	if (isValid(temp)) {
+                        			cout << "we got it" << endl;
+                        			currentNode->Setkey(temp);
+						currentNode->PrintNode();
+                        			return;
+                			}
+
+					children.push_back( temp );
+				}
+                	}
+        	}
+
 		for (auto child : children) {
 			if ( child != currentNode->key){
 				Node* tmp = new Node(child, currentNode->parent);
@@ -76,11 +93,9 @@ void BFS( vector<int> permutation, int n ) {
 			}
 		}
 	}
-	//cout << "Number of times loop goes threw: " << count  << endl;
 }
 
 vector<vector<int>> findChildren( vector<int> state ) {
-	
 	vector<vector<int>> children;
 	for ( int i = 0; i < state.size(); i++) {
 		for ( int j = i+1; j <=	state.size(); j++) {
