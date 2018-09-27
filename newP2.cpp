@@ -13,10 +13,14 @@ bool isValid( vector<int> state );
 
 struct Node
 {
-  vector<int> key;
-  int parent;
-  Node(vector<int> x, int y){ key = x; parent = y; }
-  PrintNode(Node* node) { cout << node->key << endl; }
+
+	vector<int> key;
+	int parent;
+	Node(vector<int> x, int y){ key = x; parent = y; }
+	void PrintNode() { cout << key[0] << endl; }
+	vector<int> getKey() { return key; }
+
+
 
 };
 
@@ -51,10 +55,9 @@ void BFS( vector<int> permutation, int n ) {
   	vector<Node*>Pointers;
 	queue<Node*> Queue;
 	Node* start = new Node(permutation, -1);
-	Node::PrintNode(start);
-	Pointers.push_back(start);
-	//cout << Pointers.begin().key << endl;
-  
+	Node* temp = start;
+	start->PrintNode();
+	Pointers.push_back(start); 
 }
 
 vector<vector<int>> findChildren( vector<int*> state ) {
