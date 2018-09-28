@@ -2,7 +2,9 @@
 #include <iostream>
 #include <string>
 #include <queue>
-#include <math.h>
+//#include <math.h>
+#include <algorithm>
+#include <time.h>
 using namespace std;
 
 void BFS( vector<int> permutation, int n );
@@ -10,11 +12,16 @@ vector<vector<int>> findChildren( vector<int> state );
 vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
 
+
+
 struct Node
 {
   vector<int> key;
   int parent;
 };
+
+void printOutput( vector<Node> Pointers, int idx );
+
 
 int main() {
 
@@ -24,6 +31,9 @@ int main() {
   getline(cin, ary);
   vector<int> perm;
   
+  
+
+  // Convert string array to int vector
   string tmp;
   for( int i = 0; i < ary.length(); i++) {
 
@@ -50,40 +60,59 @@ void BFS( vector<int> permutation, int n ) {
 
   Node start;
 
-  cout << "before loop\n";
   
   for( int i = 0; i < permutation.size(); i++ ) {
-    cout << "iteration step: " << i << endl;
-    cout << "perm[i] " << permutation[i] << endl;
     start.key.push_back( permutation[i] );
   }
 
-  cout << "after loop\n";
+  time_t tstart = clock();
   
 
+  // Set up base case condition for printing out solution
   start.parent = -1;
-
+  // Push initial state
   Pointers.push_back( start );
-
+  // Set up index for current node
   start.parent = 0;
   
   Queue.push( start );
 
-  cout << "made it\n";
+  int count = 0;
+
   
   while( ! Queue.empty() ) {
 
+    /*
+    cout << endl;
+    cout << "Current Queue" << endl;
+    
+    queue<Node> qtemp = Queue;
+    while( ! qtemp.empty() ) {
+
+      Node qnode = qtemp.front();
+      qtemp.pop();
+      for( int i = 0; i < qnode.key.size(); i++ )
+	cout << qnode.key[i] << ' ';
+      cout << endl;
+    }
+    */
+    
     
     Node currentNode = Queue.front();
     Queue.pop();
 
+    
+
     if( isValid( currentNode.key ) ) {
-      //printOutput( Pointers, currentNode.parent );
+      cout << "we made it\n";
+      cout << endl << "Steps:" << endl;
+      printOutput( Pointers, currentNode.parent );
       return;
     }
 
     vector<vector<int>> children = findChildren( currentNode.key );
 
+    /*
     cout << "done getting children\n";
 
     for( int j = 0; j < children.size(); j++ ) {
@@ -94,6 +123,8 @@ void BFS( vector<int> permutation, int n ) {
       cout << endl;
       
     }
+    */
+    
     
     for( auto child = children.begin(); child != children.end(); ++child ) {
 
@@ -106,12 +137,20 @@ void BFS( vector<int> permutation, int n ) {
       Node tmp2;
       tmp2.key = *child;
       tmp2.parent = Pointers.size() -1;
-      cout << "before queue push\n";
       Queue.push( tmp2 );
-      cout << "after queue push\n";
+
+      count++;
+      
+      if( isValid( tmp2.key ) ) {
+	cout << "we made it\n";
+	printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+	cout << "Total nodes checked: " << count << endl;
+	cout << "steps:\n";
+	printOutput( Pointers, tmp2.parent );
+	return;
+      }
       
     }
-    
     
 
   }
@@ -131,11 +170,12 @@ vector<vector<int>> findChildren( vector<int> state ) {
     for(int j = 0; j < state.size() - i; j++ ) {
       count++;
       children.push_back(reverse(state, j, j+i));
-	
-      i += 1;
-    }
+    }	
+    i += 1;
+    
   }
 
+  /*
   cout << "total children found is " << count << endl;
   for( int j = 0; j < children.size(); j++ ) {
       cout << "child " << j << ' ';
@@ -145,8 +185,7 @@ vector<vector<int>> findChildren( vector<int> state ) {
       cout << endl;
 
     }
-  cout << "end find children\n";
-
+  */
   
   return children;
   
@@ -160,39 +199,44 @@ vector<int> reverse ( vector<int> child, int start, int end ) {
   for( int i = 0; i < child.size(); i++ )
     newA.push_back( child[i] );
 
-  cout << "in reverse\n";
+  /*
+  cout << "parent state ";
 
-
-  end -= start;
-
-  if( end % 2 == 0 )
-    end /= 2;
-  else
-    end = end/2 + 1;
-
-  cout << "end = " << end << endl;
+  for( int i = 0; i < newA.size(); i++ ) {
+    cout << newA[i] << ' ';
+  }
+  cout << endl;
+  cout << "start = " << start << "; end = " << end << endl;
   
-  for( int i = 0; i < end; i++  ) {
+  /*
+  int mid = start - end;
 
-    cout << "iteration " << i << endl;
+  if( mid % 2 == 0 )
+    mid /= 2;
+  else
+    mid = mid/2 + 1;
+
+  cout << "mid = " << mid << endl;
+  
+  
+  for( int i = 0; i < mid; i++  ) {
     
     int tmp = newA[start+i];
 
-    cout << "after tmep\n";
-    
-    newA[start + i] = newA[start - i];
-    cout << "after first equal\n";
-    newA[start - 1] = tmp;
-    cout << "after second\n";
-  }
+    newA[start + i] = newA[end - i];
+    newA[end - i] = tmp;
 
+  }
+  */
+  reverse(newA.begin()+start, newA.begin()+end+1);
+
+  /*
   cout << "reverse values are ";
   for( int i = 0; i < newA.size(); i++ ) {
     cout << newA[i] << ' ';
   }
   cout << endl;
-  
-  cout << "finished reverse\n";
+  */
   
   return newA;
 
@@ -206,7 +250,21 @@ bool isValid( vector<int> state ) {
 
 
   return true;
-    
   
   
+}
+
+
+void printOutput( vector<Node> Pointers, int idx ) {
+
+  if( idx == -1 )
+    return;
+
+  for( int i = 0; i < Pointers[idx].key.size(); i++ ) {
+    cout << Pointers[idx].key[i] << ' ';
+  }
+  cout << endl;
+
+  printOutput( Pointers, Pointers[idx].parent );
+
 }
