@@ -8,7 +8,7 @@
 using namespace std;
 
 void BFS( vector<int> permutation, int n );
-bool DFS( vector<int> permutation, int d );
+bool DFS( vector<int> permutation, int d, int &count );
 vector<vector<int>> findChildren( vector<int> state );
 vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
@@ -60,13 +60,15 @@ int main() {
     
     
     int depth = 0;
+    int IDScount = 0;
     cout << "IDS\n";
     
     time_t tstart = clock();
     
-    while( ! DFS(perm, depth++) ) {}
+    while( ! DFS(perm, depth++, IDScount) ) {}
 
     printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+    cout << "total nodes checked: " << IDScount << endl;
 
   return 0;
 
@@ -174,7 +176,7 @@ void BFS( vector<int> permutation, int n ) {
   
 }
 
-bool DFS( vector<int> permutation, int d ) {
+bool DFS( vector<int> permutation, int d, int &IDScount ) {
     
     vector<NodeS> Pointers;
     stack<NodeS> Stk;
@@ -201,7 +203,6 @@ bool DFS( vector<int> permutation, int d ) {
     
     Stk.push( start );
     
-    int count = 0;
     
     
     while( ! Stk.empty() ) {
@@ -240,11 +241,10 @@ bool DFS( vector<int> permutation, int d ) {
             tmp2.depth = currentNode.depth+1;
             Stk.push( tmp2 );
             
-            count++;
+            IDScount++;
             
             if( isValid( tmp2.key ) ) {
                 //printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
-                cout << "Total nodes checked: " << count << endl;
                 cout << "steps:\n";
                 printOutput( Pointers, tmp2.parent );
                 return true;
