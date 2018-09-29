@@ -6,12 +6,11 @@
 #include <algorithm>
 //poop
 using namespace std;
-
 void BFS( vector<int> permutation, int n );
 vector<vector<int>> findChildren( vector<int> state );
 //vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
-
+//void PrintOutput(vector<Node*> Pointers, int idx );
 struct Node
 {
 	vector<int> key;
@@ -30,6 +29,8 @@ struct Node
 	void Setkey(vector<int> x) {
 		key = x;
 	}
+
+	//void PrintOutput(vector<Node*> Pointers, int idx );
 };
 int main() {	
 	cout << "Enter a list of numbers: ";
@@ -52,11 +53,11 @@ void BFS( vector<int> permutation, int n ) {
   	vector<Node*>Pointers;
 	queue<Node*> Queue;
 	Node* start = new Node(permutation, -1);
-	Node* temp = start;
-	start->PrintNode();
+	Node* temp =  new Node(permutation, 0);
+	//start->PrintNode();
 	Pointers.push_back(start);
-	start->SetParent(0);
-	Queue.push(start);
+	temp->SetParent(0);
+	Queue.push(temp);
 	while ( !Queue.empty()){
 		Node *currentNode = Queue.front();
 		Queue.pop();
@@ -75,7 +76,18 @@ void BFS( vector<int> permutation, int n ) {
                         			cout << "we got it" << endl;
                         			currentNode->Setkey(temp);
 						currentNode->PrintNode();
-                        			return;
+                        			Node* tmp = new Node(temp, currentNode->parent);
+                        		        Pointers.push_back( tmp );
+                	               		Node* tmp2 = new Node(temp, Pointers.size()-1);
+		                                Queue.push( tmp2 );
+						int idx = Queue.back()->parent;
+						cout << "Value of idx: " << idx << endl;	
+						while (idx!= -1){
+                					Pointers[idx]->PrintNode();
+							idx = Pointers[idx]->parent;
+						}
+						//PrintOutput(Pointers, Queue.front()->parent);			
+						return;
                 			}
 
 					children.push_back( temp );
@@ -87,8 +99,8 @@ void BFS( vector<int> permutation, int n ) {
 			if ( child != currentNode->key){
 				Node* tmp = new Node(child, currentNode->parent);
 				Pointers.push_back( tmp );
-				tmp->SetParent( Pointers.size()-1);
-				Queue.push( tmp );
+				Node* tmp2 = new Node(child, Pointers.size()-1);
+				Queue.push( tmp2 );
 					
 			}
 		}
@@ -123,10 +135,14 @@ bool isValid( vector<int> state ) {
   for( int i = 0; i < state.size() - 1; i++ )
     if( state[i] > state[i+1] )
       return false;
-
-
-  return true;
-    
-  
-  
+  return true; 
 }
+/*
+void PrintOutput(vector<Node*> Pointers, int idx ){
+
+	for ( int i = 0; i< Pointers.size(); i++ ){
+		//vector<int> tmp = Pointers[idx]->getKey();
+		Pointers[idx]->PrintNode();
+		
+	}
+}*/	
