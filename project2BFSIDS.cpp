@@ -7,8 +7,8 @@
 #include <time.h>
 using namespace std;
 
-void BFS( vector<int> permutation, int n );
-bool DFS( vector<int> permutation, int d, int &count );
+void BFS( vector<int> permutation );
+bool DFS( vector<int> permutation, int d, time_t tstart );
 vector<vector<int>> findChildren( vector<int> state );
 vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
@@ -55,26 +55,24 @@ int main() {
   perm.push_back( stoi(tmp) );
 
     cout << "BFS\n";
-  BFS(perm, perm.size() );
+  BFS(perm );
     
     
     
     int depth = 0;
-    int IDScount = 0;
     cout << "IDS\n";
     
     time_t tstart = clock();
     
-    while( ! DFS(perm, depth++, IDScount) ) {}
+    while( ! DFS(perm, depth++, tstart) ) {}
 
-    printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
-    cout << "total nodes checked: " << IDScount << endl;
+    //printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
 
   return 0;
 
 }
 
-void BFS( vector<int> permutation, int n ) {
+void BFS( vector<int> permutation ) {
   
   vector<Node> Pointers;
   queue<Node> Queue;
@@ -176,12 +174,14 @@ void BFS( vector<int> permutation, int n ) {
   
 }
 
-bool DFS( vector<int> permutation, int d, int &IDScount ) {
+bool DFS( vector<int> permutation, int d, time_t tstart ) {
     
     vector<NodeS> Pointers;
     stack<NodeS> Stk;
     
     NodeS start;
+    
+    int count = 0;
     
     
     for( int i = 0; i < permutation.size(); i++ ) {
@@ -241,10 +241,11 @@ bool DFS( vector<int> permutation, int d, int &IDScount ) {
             tmp2.depth = currentNode.depth+1;
             Stk.push( tmp2 );
             
-            IDScount++;
+            count++;
             
             if( isValid( tmp2.key ) ) {
-                //printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+                printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+                cout << "total number of nodes visited: " << count << endl;
                 cout << "steps:\n";
                 printOutput( Pointers, tmp2.parent );
                 return true;
