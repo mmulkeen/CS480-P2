@@ -7,13 +7,11 @@
 #include <time.h>
 using namespace std;
 
-void BFS( vector<int> permutation );
-bool DFS( vector<int> permutation, int d, time_t tstart );
+void BFS( vector<int> permutation, int n );
+bool DFS( vector<int> permutation, int d, int &count );
 vector<vector<int>> findChildren( vector<int> state );
 vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
-
-
 
 struct Node
 {
@@ -55,28 +53,30 @@ int main() {
   perm.push_back( stoi(tmp) );
 
     cout << "BFS\n";
-  BFS(perm );
+  BFS(perm, perm.size() );
     
     
     
     int depth = 0;
+    int IDScount = 0;
     cout << "IDS\n";
     
     time_t tstart = clock();
     
-    while( ! DFS(perm, depth++, tstart) ) {}
+    while( ! DFS(perm, depth++, IDScount) ) {}
 
-    //printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+    printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+    //cout << "total nodes checked: " << IDScount << endl;
 
   return 0;
 
 }
 
-void BFS( vector<int> permutation ) {
+void BFS( vector<int> permutation, int n ) {
   
   vector<Node> Pointers;
   queue<Node> Queue;
-
+  int max = 0;
   Node start;
 
   
@@ -95,55 +95,26 @@ void BFS( vector<int> permutation ) {
   start.parent = 0;
   
   Queue.push( start );
-
+  max = Queue.size();
   int count = 0;
 
   
   while( ! Queue.empty() ) {
-
-    /*
-    cout << endl;
-    cout << "Current Queue" << endl;
-    
-    queue<Node> qtemp = Queue;
-    while( ! qtemp.empty() ) {
-
-      Node qnode = qtemp.front();
-      qtemp.pop();
-      for( int i = 0; i < qnode.key.size(); i++ )
-	cout << qnode.key[i] << ' ';
-      cout << endl;
-    }
-    */
-    
-    
+ 
     Node currentNode = Queue.front();
     Queue.pop();
-
-    
+    //cout << "Size of Queue: " << max << endl;    
 
     if( isValid( currentNode.key ) ) {
       cout << endl << "Steps:" << endl;
       printOutput( Pointers, currentNode.parent );
+      cout << "Total nodes checked: " << count << endl;
+      cout << "Max size of Queue: " << max << endl;
+      printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
       return;
     }
 
-    vector<vector<int>> children = findChildren( currentNode.key );
-
-    /*
-    cout << "done getting children\n";
-
-    for( int j = 0; j < children.size(); j++ ) {
-      cout << "child " << j << ' ';
-      for( int k = 0; k < children[j].size(); k++ ) {
-	cout << children[j][k] << ' ';
-      }
-      cout << endl;
-      
-    }
-    */
-    
-    
+    vector<vector<int>> children = findChildren( currentNode.key );    
     for( auto child = children.begin(); child != children.end(); ++child ) {
 
       Node tmp;
@@ -156,41 +127,37 @@ void BFS( vector<int> permutation ) {
       tmp2.key = *child;
       tmp2.parent = Pointers.size() -1;
       Queue.push( tmp2 );
-
+      if (Queue.size() > max) {
+      	max = Queue.size();
+      }
       count++;
-      
+      //cout << "Size of Queue: " << max << endl;
       if( isValid( tmp2.key ) ) {
+	      /*
 	printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
 	cout << "Total nodes checked: " << count << endl;
+	cout << "Max size of Queue: " << max << endl;*/
 	cout << "steps:\n";
 	printOutput( Pointers, tmp2.parent );
+        cout << "Total nodes checked: " << count << endl;
+        cout << "Max size of Queue: " << max << endl;
+	printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
 	return;
-      }
-      
+      } 
     }
-    
-
   }
-  
 }
 
-bool DFS( vector<int> permutation, int d, time_t tstart ) {
+bool DFS( vector<int> permutation, int d, int &IDScount ) {
     
     vector<NodeS> Pointers;
     stack<NodeS> Stk;
-    
+    int max = Stk.size();
     NodeS start;
-    
-    int count = 0;
-    
     
     for( int i = 0; i < permutation.size(); i++ ) {
         start.key.push_back( permutation[i] );
     }
-    
-    //time_t tstart = clock();
-    
-    
     // Set up base case condition for printing out solution
     start.parent = -1;
     start.depth = 0;
@@ -203,7 +170,7 @@ bool DFS( vector<int> permutation, int d, time_t tstart ) {
     
     Stk.push( start );
     
-    
+    max = Stk.size(); 
     
     while( ! Stk.empty() ) {
         
@@ -216,8 +183,10 @@ bool DFS( vector<int> permutation, int d, time_t tstart ) {
         
         if( isValid( currentNode.key ) ) {
             cout << endl << "Steps:" << endl;
-            printOutput( Pointers, currentNode.parent );
-            return true;
+	    printOutput( Pointers, currentNode.parent );
+	    cout << "Total nodes checked: " << IDScount << endl;
+            cout << "Max size of stack: " << max << endl;
+	    return true;
         }
         
         if( currentNode.depth < d ) {
@@ -240,15 +209,16 @@ bool DFS( vector<int> permutation, int d, time_t tstart ) {
             tmp2.parent = Pointers.size() -1;
             tmp2.depth = currentNode.depth+1;
             Stk.push( tmp2 );
-            
-            count++;
-            
+            if (Stk.size() > max)
+		    max = Stk.size();
+            IDScount++;
+            //cout << "Size of Queue: " << max << endl;
             if( isValid( tmp2.key ) ) {
-                printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
-                cout << "total number of nodes visited: " << count << endl;
-                cout << "steps:\n";
+		cout << "steps:\n";
                 printOutput( Pointers, tmp2.parent );
-                return true;
+		cout << "Total nodes checked: " << IDScount << endl;
+                cout << "Max size of stack: " << max << endl;
+		return true;
             }
             
         }
@@ -323,20 +293,52 @@ bool isValid( vector<int> state ) {
 
 void printOutput( vector<Node> Pointers, int idx ) {
 
-  if( idx == -1 )
-    return;
+   
+  vector<vector<int>> Q;
+  
+  while( idx != -1 ) {
 
-  for( int i = 0; i < Pointers[idx].key.size(); i++ ) {
-    cout << Pointers[idx].key[i] << ' ';
+    Q.push_back(Pointers[idx].key);
+    idx = Pointers[idx].parent;
+    
   }
-  cout << endl;
-
-  printOutput( Pointers, Pointers[idx].parent );
+  //cout << "Queue Size is: " << Q.size() << endl;
+  vector<int> it;
+  for ( int i = Q.size()-1; i >= 0; i--) {
+    it = Q[i];
+    for ( int j = 0; j < it.size(); j++) {
+    	cout<< it[j] << ' ';
+    }
+    cout << endl;
+  }
+  //printOutput( Pointers, Pointers[idx].parent );
 
 }
 
 void printOutput( vector<NodeS> Pointers, int idx ) {
-    
+   
+  vector<vector<int>> Q;
+
+  while( idx != -1 ) {
+
+    Q.push_back(Pointers[idx].key);
+    idx = Pointers[idx].parent;
+
+  }
+  //cout << "Queue Size is: " << Q.size() << endl;
+  vector<int> it;
+  for ( int i = Q.size()-1; i >= 0; i--) {
+    it = Q[i];
+    for ( int j = 0; j < it.size(); j++) {
+        cout<< it[j] << ' ';
+    }
+    cout << endl;
+  }
+}
+	
+	
+	
+	/* 
     if( idx == -1 )
         return;
     
@@ -346,5 +348,5 @@ void printOutput( vector<NodeS> Pointers, int idx ) {
     cout << endl;
     
     printOutput( Pointers, Pointers[idx].parent );
-    
-}
+    */
+
