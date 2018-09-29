@@ -2,12 +2,13 @@
 #include <iostream>
 #include <string>
 #include <queue>
-//#include <math.h>
+#include <stack>
 #include <algorithm>
 #include <time.h>
 using namespace std;
 
 void BFS( vector<int> permutation, int n );
+bool DFS( vector<int> permutation, int d );
 vector<vector<int>> findChildren( vector<int> state );
 vector<int> reverse ( vector<int> child, int start, int end );
 bool isValid( vector<int> state );
@@ -20,7 +21,15 @@ struct Node
   int parent;
 };
 
+struct NodeS
+{
+    vector<int> key;
+    int parent;
+    int depth;
+};
+
 void printOutput( vector<Node> Pointers, int idx );
+void printOutput( vector<NodeS> Pointers, int idx );
 
 
 int main() {
@@ -45,9 +54,19 @@ int main() {
   }
   perm.push_back( stoi(tmp) );
 
-  
+    cout << "BFS\n";
   BFS(perm, perm.size() );
-  
+    
+    
+    
+    int depth = 0;
+    cout << "IDS\n";
+    
+    time_t tstart = clock();
+    
+    while( ! DFS(perm, depth++) ) {}
+
+    printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
 
   return 0;
 
@@ -104,7 +123,6 @@ void BFS( vector<int> permutation, int n ) {
     
 
     if( isValid( currentNode.key ) ) {
-      cout << "we made it\n";
       cout << endl << "Steps:" << endl;
       printOutput( Pointers, currentNode.parent );
       return;
@@ -142,7 +160,6 @@ void BFS( vector<int> permutation, int n ) {
       count++;
       
       if( isValid( tmp2.key ) ) {
-	cout << "we made it\n";
 	printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
 	cout << "Total nodes checked: " << count << endl;
 	cout << "steps:\n";
@@ -155,6 +172,92 @@ void BFS( vector<int> permutation, int n ) {
 
   }
   
+}
+
+bool DFS( vector<int> permutation, int d ) {
+    
+    vector<NodeS> Pointers;
+    stack<NodeS> Stk;
+    
+    NodeS start;
+    
+    
+    for( int i = 0; i < permutation.size(); i++ ) {
+        start.key.push_back( permutation[i] );
+    }
+    
+    //time_t tstart = clock();
+    
+    
+    // Set up base case condition for printing out solution
+    start.parent = -1;
+    start.depth = 0;
+    // Push initial state
+    Pointers.push_back( start );
+    // Set up index for current node
+    start.parent = 0;
+    
+    
+    
+    Stk.push( start );
+    
+    int count = 0;
+    
+    
+    while( ! Stk.empty() ) {
+        
+        
+        
+        NodeS currentNode = Stk.top();
+        Stk.pop();
+        
+        
+        
+        if( isValid( currentNode.key ) ) {
+            cout << endl << "Steps:" << endl;
+            printOutput( Pointers, currentNode.parent );
+            return true;
+        }
+        
+        if( currentNode.depth < d ) {
+           
+        
+        vector<vector<int>> children = findChildren( currentNode.key );
+        
+        
+        for( auto child = children.begin(); child != children.end(); ++child ) {
+            
+            NodeS tmp;
+            tmp.key = *child;
+            tmp.parent = currentNode.parent;
+            tmp.depth = currentNode.depth;
+            
+            Pointers.push_back( tmp );
+            
+            NodeS tmp2;
+            tmp2.key = *child;
+            tmp2.parent = Pointers.size() -1;
+            tmp2.depth = currentNode.depth+1;
+            Stk.push( tmp2 );
+            
+            count++;
+            
+            if( isValid( tmp2.key ) ) {
+                //printf("Time taken: %.5fs\n", (double)(clock() - tstart)/CLOCKS_PER_SEC);
+                cout << "Total nodes checked: " << count << endl;
+                cout << "steps:\n";
+                printOutput( Pointers, tmp2.parent );
+                return true;
+            }
+            
+        }
+        }
+        
+        
+    }
+    
+    return false;
+    
 }
 
 vector<vector<int>> findChildren( vector<int> state ) {
@@ -175,17 +278,7 @@ vector<vector<int>> findChildren( vector<int> state ) {
     
   }
 
-  /*
-  cout << "total children found is " << count << endl;
-  for( int j = 0; j < children.size(); j++ ) {
-      cout << "child " << j << ' ';
-      for( int k = 0; k < children[j].size(); k++ ) {
-        cout << children[j][k] << ' ';
-      }
-      cout << endl;
 
-    }
-  */
   
   return children;
   
@@ -199,35 +292,7 @@ vector<int> reverse ( vector<int> child, int start, int end ) {
   for( int i = 0; i < child.size(); i++ )
     newA.push_back( child[i] );
 
-  /*
-  cout << "parent state ";
 
-  for( int i = 0; i < newA.size(); i++ ) {
-    cout << newA[i] << ' ';
-  }
-  cout << endl;
-  cout << "start = " << start << "; end = " << end << endl;
-  
-  /*
-  int mid = start - end;
-
-  if( mid % 2 == 0 )
-    mid /= 2;
-  else
-    mid = mid/2 + 1;
-
-  cout << "mid = " << mid << endl;
-  
-  
-  for( int i = 0; i < mid; i++  ) {
-    
-    int tmp = newA[start+i];
-
-    newA[start + i] = newA[end - i];
-    newA[end - i] = tmp;
-
-  }
-  */
   reverse(newA.begin()+start, newA.begin()+end+1);
 
   /*
@@ -267,4 +332,18 @@ void printOutput( vector<Node> Pointers, int idx ) {
 
   printOutput( Pointers, Pointers[idx].parent );
 
+}
+
+void printOutput( vector<NodeS> Pointers, int idx ) {
+    
+    if( idx == -1 )
+        return;
+    
+    for( int i = 0; i < Pointers[idx].key.size(); i++ ) {
+        cout << Pointers[idx].key[i] << ' ';
+    }
+    cout << endl;
+    
+    printOutput( Pointers, Pointers[idx].parent );
+    
 }
